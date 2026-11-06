@@ -1,755 +1,226 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import Image from "next/image"
-import { 
-  Mail, 
-  Phone, 
-  MapPin, 
-  GraduationCap, 
-  Award, 
-  Code2, 
-  Sparkles, 
-  Sun, 
-  Moon, 
-  ExternalLink, 
-  Check, 
-  Terminal,
-  Cpu,
-  Layers,
-  Database,
-  Cloud,
-  Wrench,
-  UserCheck
-} from "lucide-react"
+import Image from "next/image";
+import { useMemo, useState } from "react";
+import { motion } from "framer-motion";
+import {
+  ArrowDownRight, ArrowUpRight, Github, Linkedin, Mail, MapPin, Cpu,
+  Code2, Layers3, Terminal, Search, ExternalLink, Music2, GraduationCap,
+  Sparkles, Download, Radio, CircuitBoard, Cloud, Menu, X
+} from "lucide-react";
 
-// Inline definitions for Github and Linkedin icons since brand icons are removed in lucide-react v1.x
-function GithubIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...props}
-    >
-      <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
-      <path d="M9 18c-4.51 2-5-2-7-2" />
-    </svg>
-  )
-}
+type Project = { id: number; title: string; area: string; stack: string; level: string };
+const semiconductor: Project[] = [
+  ["RV32I Single-Cycle RISC-V CPU","RTL Design","SystemVerilog · Verilog · Questa","Advanced"],
+  ["5-Stage Pipelined RISC-V Core","RTL Design","SystemVerilog · Hazard Unit · Forwarding","Advanced"],
+  ["AMBA APB Protocol Design & Verification","SoC Interconnect","SystemVerilog · Assertions","Intermediate"],
+  ["AXI4-Lite Register Interface","SoC Interconnect","Verilog · AXI · UVM","Advanced"],
+  ["UART Controller with FIFO","Digital Design","Verilog · RTL · Testbench","Intermediate"],
+  ["SPI Master/Slave Controller","Digital Design","SystemVerilog · SPI","Intermediate"],
+  ["I2C Multi-Master Controller","Digital Design","Verilog · I2C · Arbitration","Advanced"],
+  ["CAN 2.0B Controller","Automotive","Verilog · CAN · CRC","Advanced"],
+  ["PWM Motor-Control IP","Digital Design","Verilog · PWM · FPGA","Intermediate"],
+  ["Parameterized Synchronous FIFO","RTL Design","SystemVerilog · Assertions","Intermediate"],
+  ["Asynchronous FIFO with CDC Checks","CDC / RTL","SystemVerilog · Gray Code","Advanced"],
+  ["Round-Robin Bus Arbiter","RTL Design","Verilog · Formal Properties","Intermediate"],
+  ["Low-Power Clock-Gating Controller","Low Power","RTL · UPF Concepts","Advanced"],
+  ["Programmable Interrupt Controller","SoC Design","SystemVerilog · RISC-V","Advanced"],
+  ["Hardware Timer & Watchdog IP","SoC Design","Verilog · APB","Intermediate"],
+  ["AES-128 Encryption Core","Security IP","SystemVerilog · Cryptography","Advanced"],
+  ["SHA-256 Hardware Accelerator","Security IP","Verilog · Pipelining","Advanced"],
+  ["CRC-32 Streaming Accelerator","Digital Design","Verilog · Streaming Data","Intermediate"],
+  ["CORDIC Math Accelerator","DSP Hardware","Verilog · Fixed Point","Advanced"],
+  ["FIR Filter RTL Accelerator","DSP Hardware","SystemVerilog · DSP","Advanced"],
+  ["FFT Butterfly Processing Unit","DSP Hardware","Verilog · Fixed Point","Advanced"],
+  ["IEEE-754 Floating-Point ALU","Processor Datapath","SystemVerilog · IEEE-754","Advanced"],
+  ["Booth Multiplier Architecture","Processor Datapath","Verilog · Arithmetic","Advanced"],
+  ["Carry-Lookahead Adder Comparison","Processor Datapath","Verilog · Synthesis","Intermediate"],
+  ["Register File with Bypass Network","Processor Datapath","SystemVerilog · RTL","Intermediate"],
+  ["Branch Predictor: 2-Bit Saturating","Computer Architecture","Verilog · Microarchitecture","Advanced"],
+  ["Cache Controller & LRU Replacement","Computer Architecture","SystemVerilog · SRAM Model","Advanced"],
+  ["DMA Engine with AXI-Stream","SoC Design","SystemVerilog · AXI-Stream","Advanced"],
+  ["JTAG TAP Controller","DFT","Verilog · IEEE 1149.1","Advanced"],
+  ["Scan Chain Insertion Study","DFT","RTL · ATPG Concepts","Advanced"],
+  ["MBIST Controller for SRAM","DFT","SystemVerilog · March Tests","Advanced"],
+  ["UVM Verification Environment for UART","Functional Verification","UVM · SystemVerilog","Advanced"],
+  ["UVM Verification for APB Peripheral","Functional Verification","UVM · Assertions","Advanced"],
+  ["Constrained-Random FIFO Verification","Functional Verification","UVM · Coverage","Advanced"],
+  ["SystemVerilog Assertions Cookbook","Functional Verification","SVA · Formal","Intermediate"],
+  ["RTL Lint & CDC Analysis Flow","Design Verification","Verilator · SpyGlass Concepts","Advanced"],
+  ["Formal Equivalence Checking Demo","Formal Verification","Yosys · EQY","Advanced"],
+  ["Open-Source RTL-to-GDSII Flow","Physical Design","OpenLane · OpenROAD","Advanced"],
+  ["Floorplanning & Power Planning Study","Physical Design","OpenROAD · LEF/DEF","Advanced"],
+  ["Standard-Cell Placement Optimization","Physical Design","OpenROAD · Tcl","Advanced"],
+  ["Clock Tree Synthesis Exploration","Physical Design","OpenROAD · CTS","Advanced"],
+  ["Static Timing Analysis Case Study","Timing Analysis","OpenSTA · SDC","Advanced"],
+  ["Setup/Hold Timing Closure Lab","Timing Analysis","STA · Constraints","Advanced"],
+  ["Power, Performance & Area Dashboard","EDA Automation","Python · OpenROAD Reports","Intermediate"],
+  ["SPICE CMOS Inverter Characterization","Analog Design","ngspice · CMOS","Intermediate"],
+  ["Two-Stage CMOS Op-Amp Design","Analog Design","LTspice · SPICE","Advanced"],
+  ["Bandgap Reference Design Study","Analog Design","SPICE · Analog IC","Advanced"],
+  ["SAR ADC Behavioral Model","Mixed Signal","Verilog-A · Python","Advanced"],
+  ["PLL Behavioral Model & Jitter Study","Mixed Signal","Verilog-A · MATLAB","Advanced"],
+  ["SRAM 6T Cell Read/Write Analysis","Memory Design","SPICE · SRAM","Advanced"]
+].map((p, i) => ({ id: i + 1, title: p[0], area: p[1], stack: p[2], level: p[3] }));
 
-function LinkedinIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...props}
-    >
-      <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
-      <rect width="4" height="12" x="2" y="9" />
-      <circle cx="4" cy="4" r="2" />
-    </svg>
-  )
-}
-import { motion, AnimatePresence } from "framer-motion"
+const software: Project[] = [
+  ["ClauseIQ — Legal Document Intelligence","AI / SaaS","Next.js · TypeScript · RAG","Existing repo"],
+  ["MediLens AI — Medical Document Assistant","AI / Healthcare","Python · Next.js · OCR","Existing repo"],
+  ["AURORA — RIS-Assisted 6G Optimization","Wireless / AI","Python · Sionna · TensorFlow","Existing repo"],
+  ["KubeStarter — Kubernetes Deployment Portal","Cloud / DevOps","TypeScript · Kubernetes · Helm","Existing repo"],
+  ["FlowPilot — Workflow Automation","Automation","Python · APIs · PostgreSQL","Existing repo"],
+  ["TinyML Predictive Maintenance","Edge AI","Python · TensorFlow Lite · MQTT","Existing repo"],
+  ["Industrial IoT Edge Gateway","IoT / Backend","C++ · MQTT · Linux","Existing repo"],
+  ["RTOS Motor Control Firmware","Embedded","C · STM32 · FreeRTOS","Existing repo"],
+  ["Secure STM32 Bootloader","Embedded Security","C · STM32 · UART/Flash","Existing repo"],
+  ["Embedded Linux Device Monitor","Embedded Linux","C · Linux · Prometheus","Existing repo"],
+  ["Multi-Tenant SaaS Starter","Backend / SaaS","FastAPI · PostgreSQL · Redis","Roadmap"],
+  ["API Gateway with Rate Limiting","Backend","Go · Redis · OpenTelemetry","Roadmap"],
+  ["Event-Driven Order Management","Backend","Java · Spring Boot · Kafka","Roadmap"],
+  ["Real-Time Collaboration Workspace","Full Stack","Next.js · WebSockets · Redis","Roadmap"],
+  ["AI Code Review Assistant","Developer Tools","Python · LLM APIs · GitHub App","Roadmap"],
+  ["RAG Knowledge Base for Teams","Generative AI","FastAPI · pgvector · LLM","Roadmap"],
+  ["Local-First Notes with Sync","Full Stack","TypeScript · SQLite · CRDT","Roadmap"],
+  ["Secure File Sharing Service","Backend / Security","Go · S3 · AES-GCM","Roadmap"],
+  ["Feature Flag & Experimentation Service","Platform Engineering","Go · PostgreSQL · Redis","Roadmap"],
+  ["Observability Starter Stack","Cloud / DevOps","OpenTelemetry · Grafana · Docker","Roadmap"],
+  ["GitOps Deployment Control Plane","DevOps","Kubernetes · Argo CD · Go","Roadmap"],
+  ["Container Image Vulnerability Dashboard","DevSecOps","Python · Trivy · React","Roadmap"],
+  ["Cloud Cost Anomaly Detector","FinOps","Python · SQL · Forecasting","Roadmap"],
+  ["Infrastructure Drift Detector","DevOps","Python · Terraform · APIs","Roadmap"],
+  ["CI Pipeline Analytics Platform","Developer Tools","TypeScript · GitHub Actions","Roadmap"],
+  ["Distributed Job Queue","Backend","Go · Redis · PostgreSQL","Roadmap"],
+  ["Webhook Delivery & Retry Platform","Backend","Java · Kafka · PostgreSQL","Roadmap"],
+  ["Search-as-a-Service API","Backend / Search","Python · OpenSearch · FastAPI","Roadmap"],
+  ["Recommendation Engine","AI / ML","Python · PyTorch · Feature Store","Roadmap"],
+  ["Fraud Detection Pipeline","AI / FinTech","Python · XGBoost · Kafka","Roadmap"],
+  ["Resume Parsing & Job Match Engine","AI / HRTech","Python · NLP · PostgreSQL","Roadmap"],
+  ["Meeting Notes & Action Extractor","AI / Productivity","Python · Whisper · LLM","Roadmap"],
+  ["Multilingual Customer Support Agent","AI / Agents","Python · RAG · Tool Calling","Roadmap"],
+  ["Document OCR & Extraction API","AI / Document AI","Python · OCR · FastAPI","Roadmap"],
+  ["Time-Series Forecasting Workbench","Data / ML","Python · Pandas · PyTorch","Roadmap"],
+  ["Data Quality Monitoring Service","Data Engineering","Python · SQL · Great Expectations","Roadmap"],
+  ["Streaming Analytics Dashboard","Data Engineering","Kafka · Flink · React","Roadmap"],
+  ["Lakehouse ETL Orchestrator","Data Engineering","Python · dbt · DuckDB","Roadmap"],
+  ["Personal Finance Insights App","Full Stack","Next.js · PostgreSQL · Charts","Roadmap"],
+  ["Inventory & POS Management SaaS","Full Stack","React · Spring Boot · PostgreSQL","Roadmap"],
+  ["Appointment Booking Engine","Backend","Node.js · PostgreSQL · Redis","Roadmap"],
+  ["Subscription Billing Starter","SaaS / Payments","Next.js · Stripe · Webhooks","Roadmap"],
+  ["Marketplace with Seller Payouts","E-commerce","Next.js · PostgreSQL · Payments","Roadmap"],
+  ["Headless CMS with Role Permissions","Backend","Go · PostgreSQL · S3","Roadmap"],
+  ["GraphQL Federation Demo","Backend","TypeScript · GraphQL · Redis","Roadmap"],
+  ["Rust Log Processing CLI","Systems","Rust · Tokio · Serde","Roadmap"],
+  ["C++ High-Performance Telemetry Collector","Systems","C++20 · gRPC · Protobuf","Roadmap"],
+  ["Network Packet Analyzer","Networking","C++ · libpcap · Wireshark","Roadmap"],
+  ["IoT Fleet Device Management","IoT Platform","MQTT · Go · PostgreSQL","Roadmap"],
+  ["Edge-to-Cloud OTA Update Manager","IoT / Embedded","C++ · MQTT · FastAPI","Roadmap"]
+].map((p, i) => ({ id: i + 1, title: p[0], area: p[1], stack: p[2], level: p[3] }));
 
-import { LiquidButton, MetalButton } from "@/components/ui/liquid-glass-button"
+const featured = [
+  { name: "AURORA_RSI_6G", desc: "RIS-assisted wireless network optimization research and simulation.", href: "https://github.com/PrajwalMhetre/AURORA_RSI_6G", tags: "6G · Sionna · TensorFlow" },
+  { name: "ClauseIQ", desc: "Legal document intelligence application and retrieval workflows.", href: "https://github.com/PrajwalMhetre/ClauseIQ", tags: "AI · RAG · TypeScript" },
+  { name: "MediLens-AI", desc: "AI-assisted medical information interface.", href: "https://github.com/PrajwalMhetre/MediLens-AI", tags: "AI · Healthcare" },
+  { name: "RTOS-Motor-Control-STM32", desc: "Real-time embedded motor-control project.", href: "https://github.com/PrajwalMhetre/RTOS-Motor-Control-STM32", tags: "STM32 · RTOS · C" },
+  { name: "rv32i-single-cycle-core", desc: "RISC-V RV32I single-cycle processor RTL repository.", href: "https://github.com/PrajwalMhetre/rv32i-single-cycle-core", tags: "RISC-V · Verilog" },
+  { name: "FlowPilot-Automation", desc: "Workflow automation project.", href: "https://github.com/PrajwalMhetre/FlowPilot-Automation", tags: "Automation · APIs" }
+];
 
-// Skill groups matching the resume (expanded to 50+ total skills)
-const skillCategories = [
-  {
-    name: "Languages",
-    icon: Code2,
-    skills: ["Python", "TypeScript", "JavaScript", "Java", "C/C++", "SQL", "Embedded C", "HTML5", "CSS3", "Go (Basic)", "Rust (Basic)", "Bash/Shell"]
-  },
-  {
-    name: "AI / ML / GenAI",
-    icon: Cpu,
-    skills: ["LLMs", "RAG pipelines", "NLP", "Scikit-learn", "TensorFlow (Basic)", "Prompt Engineering", "AI Agents", "LangChain", "LlamaIndex", "Vector Databases", "Neural Networks", "Deep Learning"]
-  },
-  {
-    name: "Full-Stack",
-    icon: Layers,
-    skills: ["React.js", "Node.js", "Express.js", "Flask", "REST API design", "JWT Authentication", "Next.js", "FastAPI", "Zustand", "GraphQL", "WebSockets"]
-  },
-  {
-    name: "Databases",
-    icon: Database,
-    skills: ["PostgreSQL", "MongoDB", "MySQL", "BigQuery", "Schema Design", "Query Optimization", "Redis", "Prisma ORM", "SQLite", "Firebase"]
-  },
-  {
-    name: "Cloud & DevOps",
-    icon: Cloud,
-    skills: ["GCP", "AWS", "Docker", "Git", "GitHub", "GitHub Actions", "CI/CD", "Vercel", "Nginx", "Linux Admin"]
-  },
-  {
-    name: "Core CS & Soft Skills",
-    icon: Wrench,
-    skills: ["DSA", "OOP", "DBMS", "OS", "System Design", "SDLC", "Agile/Scrum", "Problem-solving", "Ownership", "Collaboration", "Documentation"]
-  }
-]
-
-// Project data matching the resume
-const projects = [
-  {
-    title: "ClauseIQ",
-    subtitle: "AI Legal Document Intelligence Platform",
-    tags: ["TypeScript", "LLMs", "RAG", "Document AI", "Next.js", "Tailwind CSS"],
-    bullets: [
-      "Built a production-grade AI platform that analyzes legal contracts and PDFs using LLMs and RAG — delivering document summarization, clause extraction, and risk detection.",
-      "Architected a full retrieval pipeline: PDF ingestion, chunking, vector retrieval, and LLM-based structured output generation — end-to-end AI application development."
-    ],
-    github: "https://github.com/PrajwalMhetre/ClauseIQ"
-  },
-  {
-    title: "GitPilot-AI",
-    subtitle: "Agentic AI Developer Automation Tool",
-    tags: ["Python", "LLM Agents", "Agentic Workflows", "LangChain", "Docker"],
-    bullets: [
-      "Built an autonomous AI agent that analyzes codebases, plans multi-step changes, and executes developer tasks end-to-end using tool-calling orchestration patterns.",
-      "Implemented plan → act → validate loops with structured error handling — demonstrating production-grade agentic software design."
-    ],
-    github: "https://github.com/PrajwalMhetre/GitPilot-AI"
-  },
-  {
-    title: "Fake-News-Detection",
-    subtitle: "NLP Misinformation Classifier",
-    tags: ["Python", "NLP", "Machine Learning", "Classification", "Flask"],
-    bullets: [
-      "Built an end-to-end NLP pipeline for fake news detection: text preprocessing, TF-IDF feature extraction, model training, evaluation, and REST API deployment."
-    ],
-    github: "https://github.com/PrajwalMhetre/Fake-News-Detection"
-  },
-  {
-    title: "MediLens-AI",
-    subtitle: "Medical AI Decision Support System",
-    tags: ["HTML", "AI APIs", "Healthcare", "JavaScript", "Tailwind CSS"],
-    bullets: [
-      "Built a medical AI interface integrating AI model APIs for health data analysis and decision support — user-facing AI product shipped end-to-end."
-    ],
-    github: "https://github.com/PrajwalMhetre/MediLens-AI"
-  }
-]
+const skills = ["Python", "C", "C++", "Java", "TypeScript", "SystemVerilog", "Verilog", "STM32", "ESP32", "FreeRTOS", "Linux", "FastAPI", "Next.js", "React", "PostgreSQL", "Docker", "Kubernetes", "GitHub Actions", "TensorFlow", "Sionna", "MQTT", "I2C / SPI / UART / CAN"];
 
 export default function Portfolio() {
-  const [theme, setTheme] = React.useState<"light" | "dark">("dark")
-  const [activeTab, setActiveTab] = React.useState(0)
-  const [mounted, setMounted] = React.useState(false)
-  
-  // Playground state
-  const [playgroundBtnStyle, setPlaygroundBtnStyle] = React.useState<"liquid" | "metal">("liquid")
-  const [metalVariant, setMetalVariant] = React.useState<"default" | "primary" | "success" | "error" | "gold" | "bronze">("gold")
-  
-  // Contact Form State
-  const [formState, setFormState] = React.useState({ name: "", email: "", message: "" })
-  const [isSubmitting, setIsSubmitting] = React.useState(false)
-  const [isSubmitted, setIsSubmitted] = React.useState(false)
-
-  React.useEffect(() => {
-    setMounted(true)
-    const savedTheme = localStorage.getItem("theme") as "light" | "dark" | null
-    const initialTheme = savedTheme || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
-    setTheme(initialTheme)
-    if (initialTheme === "dark") {
-      document.documentElement.classList.add("dark")
-    } else {
-      document.documentElement.classList.remove("dark")
-    }
-  }, [])
-
-  const toggleTheme = () => {
-    const newTheme = theme === "light" ? "dark" : "light"
-    setTheme(newTheme)
-    localStorage.setItem("theme", newTheme)
-    if (newTheme === "dark") {
-      document.documentElement.classList.add("dark")
-    } else {
-      document.documentElement.classList.remove("dark")
-    }
-  }
-
-  const handleContactSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!formState.name || !formState.email || !formState.message) return
-    setIsSubmitting(true)
-    setTimeout(() => {
-      setIsSubmitting(false)
-      setIsSubmitted(true)
-      setFormState({ name: "", email: "", message: "" })
-      setTimeout(() => setIsSubmitted(false), 5000)
-    }, 1500)
-  }
-
-  if (!mounted) {
-    return <div className="min-h-screen bg-slate-950" />
-  }
+  const [kind, setKind] = useState<"all" | "semiconductor" | "software">("all");
+  const [query, setQuery] = useState("");
+  const [level, setLevel] = useState("All");
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const projects = useMemo(() => {
+    const base = kind === "semiconductor" ? semiconductor : kind === "software" ? software : [...semiconductor, ...software];
+    return base.filter(p => (p.title + p.area + p.stack + p.level).toLowerCase().includes(query.toLowerCase()) && (level === "All" || p.level === level));
+  }, [kind, query, level]);
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100 overflow-x-hidden selection:bg-indigo-500 selection:text-white">
-      {/* Decorative Orbs */}
-      <div className="absolute top-0 left-0 w-full overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-indigo-500/10 blur-[120px] dark:bg-indigo-900/20" />
-        <div className="absolute top-[20%] right-[-10%] w-[45vw] h-[45vw] rounded-full bg-emerald-500/10 blur-[120px] dark:bg-emerald-900/15" />
-        <div className="absolute bottom-[20%] left-[-5%] w-[40vw] h-[40vw] rounded-full bg-amber-500/5 blur-[120px] dark:bg-amber-900/10" />
-      </div>
+    <main className="min-h-screen overflow-hidden bg-[#080b12] text-[#edf2f7]">
+      <div className="pointer-events-none fixed inset-0 z-0 opacity-40" style={{backgroundImage:"linear-gradient(rgba(148,163,184,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(148,163,184,.055) 1px,transparent 1px)",backgroundSize:"54px 54px"}} />
+      <div className="pointer-events-none fixed -top-48 left-1/4 z-0 h-[520px] w-[520px] rounded-full bg-cyan-500/10 blur-[130px]" />
+      <div className="pointer-events-none fixed right-[-140px] top-[35%] z-0 h-[440px] w-[440px] rounded-full bg-violet-500/10 blur-[130px]" />
 
-      {/* Sticky Header */}
-      <header className="sticky top-0 z-50 w-full border-b border-slate-200/50 bg-slate-50/80 backdrop-blur-md transition-colors duration-300 dark:border-slate-800/50 dark:bg-slate-950/80">
-        <div className="mx-auto flex max-w-6xl h-16 items-center justify-between px-6">
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
-            className="flex items-center gap-2"
-          >
-            <span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-500 bg-clip-text text-xl font-bold tracking-tight text-transparent">
-              Prajwal Mhetre
-            </span>
-          </motion.div>
-
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
-            <a href="#about" className="hover:text-indigo-500 transition-colors">About</a>
-            <a href="#skills" className="hover:text-indigo-500 transition-colors">Skills</a>
-            <a href="#experience" className="hover:text-indigo-500 transition-colors">Experience</a>
-            <a href="#playground" className="hover:text-indigo-500 transition-colors">Playground</a>
-            <a href="#contact" className="hover:text-indigo-500 transition-colors">Contact</a>
+      <header className="sticky top-0 z-50 border-b border-white/10 bg-[#080b12]/85 backdrop-blur-2xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 lg:px-8">
+          <a href="#home" className="font-mono text-lg font-bold tracking-tight"><span className="text-cyan-300">PM</span><span className="text-white">.dev</span></a>
+          <nav className="hidden items-center gap-7 text-sm text-slate-300 md:flex">
+            {["About","Focus","Work","Projects","Music","Contact"].map(n => <a key={n} href={"#"+n.toLowerCase()} className="transition hover:text-cyan-300">{n}</a>)}
           </nav>
-
-          <div className="flex items-center gap-4">
-            <a href="https://github.com/PrajwalMhetre" target="_blank" rel="noreferrer" aria-label="GitHub" className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100">
-              <GithubIcon className="h-5 w-5" />
-            </a>
-            <a href="https://linkedin.com/in/prajwalmhetre" target="_blank" rel="noreferrer" aria-label="LinkedIn" className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100">
-              <LinkedinIcon className="h-5 w-5" />
-            </a>
-            
-            {/* Elegant Sun/Moon Toggle */}
-            <button 
-              onClick={toggleTheme}
-              className="relative p-2 rounded-full border border-slate-200 bg-white/50 text-slate-700 shadow-sm transition-all hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-300 dark:hover:bg-slate-800"
-            >
-              {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-            </button>
-          </div>
+          <a href="https://github.com/PrajwalMhetre" target="_blank" rel="noreferrer" className="hidden rounded-full border border-cyan-300/30 px-4 py-2 text-xs font-semibold text-cyan-200 transition hover:bg-cyan-300/10 md:block">GITHUB PROFILE ↗</a>
+          <button className="md:hidden" aria-label="Toggle navigation" onClick={() => setMobileOpen(!mobileOpen)}>{mobileOpen ? <X/> : <Menu/>}</button>
         </div>
+        {mobileOpen && <nav className="grid gap-3 border-t border-white/10 px-6 py-5 md:hidden">{["About","Focus","Work","Projects","Music","Contact"].map(n=><a key={n} onClick={()=>setMobileOpen(false)} href={"#"+n.toLowerCase()}>{n}</a>)}</nav>}
       </header>
 
-      <main className="relative z-10 mx-auto max-w-5xl px-6 py-12 md:py-24">
-        {/* Hero Section */}
-        <section className="grid grid-cols-1 md:grid-cols-12 gap-12 items-center mb-24 md:mb-36">
-          <div className="md:col-span-7 flex flex-col items-start space-y-6">
-            <motion.div 
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-300 border border-indigo-500/20"
-            >
-              <Sparkles className="h-3.5 w-3.5" /> Open for Specialist Programmer Opportunities
-            </motion.div>
-            
-            <motion.h1 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-4xl md:text-6xl font-extrabold tracking-tight leading-none"
-            >
-              Bridging Silicon Logic with{" "}
-              <span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-500 bg-clip-text text-transparent">
-                Cognitive Scale
-              </span>
-            </motion.h1>
-
-            <motion.p 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-lg text-slate-600 dark:text-slate-300 max-w-xl leading-relaxed"
-            >
-              Hi, I'm <strong>Prajwal Kalidas Mhetre</strong>. Leveraging a unique dual foundation in Electronics and Computer Science, I design and deploy production-grade AI agents, LLM orchestration frameworks (like <em>GitPilot-AI</em>), and intelligent retrieval pipelines that power autonomous engineering.
-            </motion.p>
-
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="flex flex-wrap gap-4 pt-4"
-            >
-              <a href="#experience">
-                <LiquidButton size="lg">
-                  Explore Projects
-                </LiquidButton>
-              </a>
-              <a href="#contact">
-                <MetalButton variant="gold">
-                  Get in Touch
-                </MetalButton>
-              </a>
-            </motion.div>
+      <section id="home" className="relative z-10 mx-auto grid max-w-7xl items-center gap-12 px-5 pb-24 pt-20 md:grid-cols-[1.2fr_.8fr] md:pt-32 lg:px-8">
+        <div>
+          <motion.div initial={{opacity:0,y:18}} animate={{opacity:1,y:0}} transition={{duration:.6}} className="mb-7 inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-300/5 px-4 py-2 text-xs font-medium text-emerald-200"><span className="h-2 w-2 animate-pulse rounded-full bg-emerald-300"/> Electronics × Software × Intelligent Systems</motion.div>
+          <motion.h1 initial={{opacity:0,y:22}} animate={{opacity:1,y:0}} transition={{duration:.7,delay:.08}} className="max-w-4xl text-5xl font-semibold leading-[1.04] tracking-[-.055em] sm:text-6xl lg:text-7xl">Engineering across <span className="bg-gradient-to-r from-cyan-300 via-blue-300 to-violet-300 bg-clip-text text-transparent">silicon & software.</span></motion.h1>
+          <motion.p initial={{opacity:0,y:18}} animate={{opacity:1,y:0}} transition={{duration:.7,delay:.18}} className="mt-7 max-w-2xl text-base leading-8 text-slate-400 md:text-lg">I’m Prajwal Mhetre — an Electronics & Communication engineering student and multidisciplinary builder exploring semiconductor design, embedded systems, AI/ML, backend engineering and cloud-native platforms.</motion.p>
+          <div className="mt-9 flex flex-wrap gap-3">
+            <a href="#work" className="group inline-flex items-center gap-3 rounded-full bg-cyan-300 px-6 py-3.5 text-sm font-bold text-slate-950 transition hover:-translate-y-1 hover:bg-cyan-200">Explore selected work <ArrowDownRight size={17}/></a>
+            <a href="https://www.linkedin.com/in/prajwalmhetre/" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full border border-white/15 px-6 py-3.5 text-sm font-semibold text-white transition hover:border-violet-300/60 hover:bg-white/5"><Linkedin size={16}/> Connect</a>
           </div>
-
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6 }}
-            className="md:col-span-5 flex justify-center items-center"
-          >
-            <div className="relative group p-3 rounded-2xl bg-gradient-to-br from-indigo-500/20 via-purple-500/20 to-emerald-500/20 dark:from-indigo-500/30 dark:to-slate-800/10 shadow-2xl">
-              {/* Outer glowing border */}
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-emerald-500 opacity-20 blur-xl group-hover:opacity-40 transition duration-700 pointer-events-none" />
-              
-              <div className="relative overflow-hidden rounded-xl border border-slate-200/80 bg-slate-50 dark:border-slate-800 dark:bg-slate-900 w-[280px] h-[280px] md:w-[320px] md:h-[320px]">
-                <Image
-                  src="/profile.jpg"
-                  alt="Prajwal Mhetre Portrait"
-                  fill
-                  priority
-                  sizes="(max-width: 768px) 280px, 320px"
-                  className="object-cover transform group-hover:scale-105 transition duration-500 filter brightness-[1.02]"
-                />
-              </div>
-            </div>
-          </motion.div>
-        </section>
-
-        {/* Professional Summary & About Section */}
-        <section id="about" className="mb-24 scroll-mt-20">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="md:col-span-1">
-              <h2 className="text-2xl font-bold tracking-tight border-b-2 border-indigo-500 inline-block pb-1">
-                Profile Summary
-              </h2>
-              <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">
-                A dual-discipline engineer bridging Electronic systems and Advanced Computer Science.
-              </p>
-            </div>
-            <div className="md:col-span-2 space-y-6">
-              <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
-                I am a final-year B.Tech ECE student (2027 batch) with a prior Diploma in Computer Science and Engineering. This unique academic foundation allows me to understand software systems from low-level silicon logic up to high-level cloud abstractions and neural network prompts.
-              </p>
-              <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
-                I have independently built and shipped multiple AI-powered full-stack applications—ranging from LLM-based document intelligence platform <strong className="text-indigo-400">ClauseIQ</strong> to autonomous terminal automation agent <strong className="text-indigo-400">GitPilot-AI</strong>. Experienced across the full software lifecycle: architecting data retrieval pipelines, designing secure APIs, writing reactive interfaces, and containerized deployments.
-              </p>
-
-              {/* Education Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
-                <div className="p-4 rounded-xl border border-slate-200 bg-white/50 dark:border-slate-800 dark:bg-slate-900/50">
-                  <div className="flex items-center gap-3">
-                    <GraduationCap className="h-5 w-5 text-indigo-500" />
-                    <h3 className="font-semibold text-sm">B.Tech ECE</h3>
-                  </div>
-                  <p className="mt-2 text-xs text-slate-600 dark:text-slate-400">Bharati Vidyapeeth College of Engineering, Pune</p>
-                  <div className="mt-2 flex justify-between items-center text-xs font-semibold">
-                    <span>2024 to 2027</span>
-                    <span className="text-emerald-500">Aggregate: 7.96 CGPA</span>
-                  </div>
-                </div>
-
-                <div className="p-4 rounded-xl border border-slate-200 bg-white/50 dark:border-slate-800 dark:bg-slate-900/50">
-                  <div className="flex items-center gap-3">
-                    <GraduationCap className="h-5 w-5 text-emerald-500" />
-                    <h3 className="font-semibold text-sm">Diploma CSE</h3>
-                  </div>
-                  <p className="mt-2 text-xs text-slate-600 dark:text-slate-400">Basavakalyan Polytechnic College</p>
-                  <div className="mt-2 flex justify-between items-center text-xs font-semibold">
-                    <span>Completed</span>
-                    <span className="text-emerald-500">CGPA: 8.88 / 10.0</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Technical Skills Section */}
-        <section id="skills" className="mb-24 scroll-mt-20">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-extrabold tracking-tight">Technical Armory</h2>
-            <p className="text-slate-600 dark:text-slate-400 mt-2 text-sm">
-              My engineering stack spanning AI, software development, and systems.
-            </p>
-          </div>
-
-          {/* Interactive Tabbed Interface */}
-          <div className="flex flex-wrap justify-center gap-2 mb-8">
-            {skillCategories.map((cat, idx) => {
-              const Icon = cat.icon
-              return (
-                <button
-                  key={cat.name}
-                  onClick={() => setActiveTab(idx)}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold transition-all border ${
-                    activeTab === idx
-                      ? "bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-600/25"
-                      : "bg-white border-slate-200 text-slate-700 hover:bg-slate-100 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-800"
-                  }`}
-                >
-                  <Icon className="h-4 w-4" />
-                  {cat.name}
-                </button>
-              )
-            })}
-          </div>
-
-          <div className="p-6 md:p-8 rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900/70 shadow-md">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeTab}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.2 }}
-                className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"
-              >
-                {skillCategories[activeTab].skills.map((skill) => (
-                  <div
-                    key={skill}
-                    className="flex items-center gap-2 p-3 rounded-lg border border-slate-100 bg-slate-50/50 hover:border-indigo-500/40 hover:bg-indigo-500/5 transition-all dark:border-slate-800/40 dark:bg-slate-800/30 dark:hover:border-indigo-500/40 dark:hover:bg-indigo-900/10"
-                  >
-                    <div className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
-                    <span className="text-sm font-medium">{skill}</span>
-                  </div>
-                ))}
-              </motion.div>
-            </AnimatePresence>
-          </div>
-        </section>
-
-        {/* Experience & Projects Section */}
-        <section id="experience" className="mb-24 scroll-mt-20">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12">
-            <div>
-              <h2 className="text-3xl font-extrabold tracking-tight">Project Portfolio</h2>
-              <p className="text-slate-600 dark:text-slate-400 mt-2 text-sm">
-                Independent production-grade systems engineered with source code on GitHub.
-              </p>
-            </div>
-            <a 
-              href="https://github.com/PrajwalMhetre" 
-              target="_blank" 
-              rel="noreferrer"
-              className="mt-4 md:mt-0 inline-flex items-center gap-2 text-sm font-semibold text-indigo-500 hover:text-indigo-600 transition-colors"
-            >
-              View GitHub Profile <ExternalLink className="h-4 w-4" />
-            </a>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {projects.map((proj, idx) => (
-              <motion.div
-                key={proj.title}
-                initial={{ opacity: 0, y: 25 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-100px" }}
-                transition={{ duration: 0.5, delay: idx * 0.1 }}
-                className="group flex flex-col h-full rounded-2xl border border-slate-200/80 bg-white/50 dark:border-slate-800/80 dark:bg-slate-900/50 backdrop-blur-md overflow-hidden hover:border-slate-300 dark:hover:border-slate-700 transition-all shadow-sm"
-              >
-                {/* Visual Header */}
-                <div className="p-6 border-b border-slate-100 dark:border-slate-800 bg-gradient-to-br from-slate-50 to-white dark:from-slate-900 dark:to-slate-900/40">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="text-lg font-bold tracking-tight text-indigo-600 dark:text-indigo-400">
-                        {proj.title}
-                      </h3>
-                      <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-0.5">
-                        {proj.subtitle}
-                      </p>
-                    </div>
-                    <a 
-                      href={proj.github} 
-                      target="_blank" 
-                      rel="noreferrer" 
-                      aria-label={`${proj.title} GitHub repository`}
-                      className="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 transition-colors"
-                    >
-                      <GithubIcon className="h-4 w-4" />
-                    </a>
-                  </div>
-
-                  {/* Tag list */}
-                  <div className="flex flex-wrap gap-1.5 mt-4">
-                    {proj.tags.map((tag) => (
-                      <span key={tag} className="px-2 py-0.5 rounded text-[10px] font-semibold bg-indigo-50 text-indigo-600 border border-indigo-100 dark:bg-indigo-950/40 dark:text-indigo-300 dark:border-indigo-900/30">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Bullets Content */}
-                <div className="p-6 flex-1 flex flex-col justify-between">
-                  <ul className="space-y-3">
-                    {proj.bullets.map((bullet, bIdx) => (
-                      <li key={bIdx} className="text-xs text-slate-600 dark:text-slate-300 flex items-start gap-2 leading-relaxed">
-                        <Terminal className="h-3.5 w-3.5 shrink-0 text-slate-400 dark:text-slate-500 mt-0.5" />
-                        <span>{bullet}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between">
-                    <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Independent Release</span>
-                    <a 
-                      href={proj.github} 
-                      target="_blank" 
-                      rel="noreferrer" 
-                      className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-500 hover:text-indigo-600 transition-colors"
-                    >
-                      Inspect Source <ExternalLink className="h-3 w-3" />
-                    </a>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </section>
-
-        {/* Certifications & Achievements */}
-        <section className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-24">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight mb-6 border-b-2 border-indigo-500 inline-block pb-1">
-              Certifications
-            </h2>
-            <div className="space-y-4">
-              {[
-                { title: "Generative AI with LLMs", issuer: "DeepLearning.AI / Coursera" },
-                { title: "Machine Learning Specialization", issuer: "Andrew Ng / Coursera" },
-                { title: "Python for Data Science & AI", issuer: "IBM / Coursera" },
-                { title: "Google Cloud Fundamentals", issuer: "Google / Coursera" }
-              ].map((cert) => (
-                <div key={cert.title} className="flex items-start gap-4 p-4 rounded-xl border border-slate-200/70 bg-white/40 dark:border-slate-800/70 dark:bg-slate-900/30">
-                  <Award className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
-                  <div>
-                    <h4 className="text-sm font-semibold leading-tight">{cert.title}</h4>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{cert.issuer}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight mb-6 border-b-2 border-indigo-500 inline-block pb-1">
-              Key Achievements
-            </h2>
-            <div className="space-y-4">
-              {[
-                "Shipped 4 complete AI-powered products independently (all live on GitHub).",
-                "Diploma in CSE (CGPA 8.88) alongside B.Tech ECE — dual-technical foundation.",
-                "Solved 100+ DSA problems on LeetCode & HackerRank — strong analytical logic.",
-                "2027 batch with no active backlogs | 60%+ in X and XII — fully eligible for Infosys roles."
-              ].map((ach, idx) => (
-                <div key={idx} className="flex items-start gap-4 p-4 rounded-xl border border-slate-200/70 bg-white/40 dark:border-slate-800/70 dark:bg-slate-900/30">
-                  <UserCheck className="h-5 w-5 text-indigo-500 shrink-0 mt-0.5" />
-                  <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">{ach}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Interactive Button Playground */}
-        <section id="playground" className="p-8 md:p-12 rounded-3xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900/50 shadow-lg mb-24 scroll-mt-20 relative overflow-hidden">
-          {/* Subtle grid background for the playground */}
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px] pointer-events-none" />
-          
-          <div className="relative z-10 max-w-2xl mx-auto text-center space-y-8">
-            <div>
-              <h2 className="text-3xl font-extrabold tracking-tight">Interactive Showcase</h2>
-              <p className="text-slate-600 dark:text-slate-400 mt-2 text-sm">
-                Experience the liquid glass and metal button animations in real time.
-              </p>
-            </div>
-
-            <div className="flex justify-center gap-4">
-              <button
-                onClick={() => setPlaygroundBtnStyle("liquid")}
-                className={`px-4 py-2 text-xs font-semibold rounded-lg border transition-all ${
-                  playgroundBtnStyle === "liquid"
-                    ? "bg-indigo-600 border-indigo-600 text-white"
-                    : "bg-slate-100 border-slate-200 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-700"
-                }`}
-              >
-                Liquid Glass Button
-              </button>
-              <button
-                onClick={() => setPlaygroundBtnStyle("metal")}
-                className={`px-4 py-2 text-xs font-semibold rounded-lg border transition-all ${
-                  playgroundBtnStyle === "metal"
-                    ? "bg-indigo-600 border-indigo-600 text-white"
-                    : "bg-slate-100 border-slate-200 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-700"
-                }`}
-              >
-                Metal Button
-              </button>
-            </div>
-
-            {/* Config options */}
-            {playgroundBtnStyle === "metal" && (
-              <div className="flex flex-wrap justify-center gap-2 p-3 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 max-w-md mx-auto">
-                {(["default", "primary", "success", "error", "gold", "bronze"] as const).map((v) => (
-                  <button
-                    key={v}
-                    onClick={() => setMetalVariant(v)}
-                    className={`px-2.5 py-1 text-[10px] font-bold uppercase rounded border transition-all ${
-                      metalVariant === v
-                        ? "bg-slate-800 border-slate-800 text-white dark:bg-slate-100 dark:border-slate-100 dark:text-slate-900"
-                        : "bg-white border-slate-200 hover:bg-slate-50 text-slate-700 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300"
-                    }`}
-                  >
-                    {v}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Main demo canvas */}
-            <div className="py-12 px-6 rounded-2xl bg-slate-50/50 dark:bg-slate-950/30 border border-slate-100 dark:border-slate-850 flex items-center justify-center min-h-[160px]">
-              <div className="scale-110 transform transition-all duration-300">
-                {playgroundBtnStyle === "liquid" ? (
-                  <LiquidButton size="xl" className="shadow-lg">
-                    Liquid Glass Button
-                  </LiquidButton>
-                ) : (
-                  <MetalButton variant={metalVariant} className="shadow-lg">
-                    {metalVariant.charAt(0).toUpperCase() + metalVariant.slice(1)} Metal
-                  </MetalButton>
-                )}
-              </div>
-            </div>
-
-            <p className="text-[11px] text-slate-400 dark:text-slate-500 italic max-w-sm mx-auto">
-              * The Liquid Glass button utilizes SVG filters (`feTurbulence`, `feDisplacementMap`, `feGaussianBlur`) for structural glass refraction and backdrop blur. The Metal button supports interactive mouse events, lighting gradients, dynamic borders, and a shine overlay.
-            </p>
-          </div>
-        </section>
-
-        {/* Contact Form Section */}
-        <section id="contact" className="max-w-xl mx-auto mb-24 scroll-mt-20">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-extrabold tracking-tight">Get In Touch</h2>
-            <p className="text-slate-600 dark:text-slate-400 mt-2 text-sm">
-              Have an opening or a project idea? Drop a message directly to my inbox.
-            </p>
-          </div>
-
-          <div className="p-8 rounded-3xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900/50 shadow-md backdrop-blur-md relative">
-            {/* Success message overlay */}
-            <AnimatePresence>
-              {isSubmitted && (
-                <motion.div 
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  className="absolute inset-0 bg-white/95 dark:bg-slate-900/95 rounded-3xl z-20 flex flex-col items-center justify-center text-center p-6"
-                >
-                  <div className="h-12 w-12 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center mb-4">
-                    <Check className="h-6 w-6" />
-                  </div>
-                  <h3 className="text-xl font-bold">Message Shipped!</h3>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 max-w-xs">
-                    Thanks for reaching out, Prajwal will get back to you shortly at the provided email.
-                  </p>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            <form onSubmit={handleContactSubmit} className="space-y-6">
-              <div>
-                <label htmlFor="name" className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Name</label>
-                <input
-                  type="text"
-                  id="name"
-                  required
-                  value={formState.name}
-                  onChange={(e) => setFormState(prev => ({ ...prev, name: e.target.value }))}
-                  className="w-full px-4 py-3 rounded-lg border border-slate-200 bg-slate-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200"
-                  placeholder="John Doe"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="email" className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Email Address</label>
-                <input
-                  type="email"
-                  id="email"
-                  required
-                  value={formState.email}
-                  onChange={(e) => setFormState(prev => ({ ...prev, email: e.target.value }))}
-                  className="w-full px-4 py-3 rounded-lg border border-slate-200 bg-slate-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200"
-                  placeholder="john@example.com"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="message" className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Message</label>
-                <textarea
-                  id="message"
-                  required
-                  rows={4}
-                  value={formState.message}
-                  onChange={(e) => setFormState(prev => ({ ...prev, message: e.target.value }))}
-                  className="w-full px-4 py-3 rounded-lg border border-slate-200 bg-slate-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200"
-                  placeholder="Write your message here..."
-                />
-              </div>
-
-              <div className="pt-2">
-                <LiquidButton 
-                  type="submit" 
-                  disabled={isSubmitting} 
-                  className="w-full flex justify-center text-center font-bold"
-                >
-                  {isSubmitting ? "Sending..." : "Submit Inquiry"}
-                </LiquidButton>
-              </div>
-            </form>
-
-            {/* Direct contact info below form */}
-            <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800/80 grid grid-cols-2 gap-4 text-xs text-slate-500 dark:text-slate-400">
-              <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-indigo-500 shrink-0" />
-                <a href="mailto:work.mhetreprajwal@gmail.com" className="hover:underline truncate">work.mhetreprajwal@gmail.com</a>
-              </div>
-              <div className="flex items-center gap-2">
-                <Phone className="h-4 w-4 text-emerald-500 shrink-0" />
-                <span>+91 8329956570</span>
-              </div>
-              <div className="flex items-center gap-2 col-span-2">
-                <MapPin className="h-4 w-4 text-amber-500 shrink-0" />
-                <span>Pune, Maharashtra, India</span>
-              </div>
-            </div>
-          </div>
-        </section>
-      </main>
-
-      {/* Footer */}
-      <footer className="border-t border-slate-200/50 py-8 bg-white dark:border-slate-800/50 dark:bg-slate-950 transition-colors duration-300">
-        <div className="mx-auto max-w-6xl px-6 flex flex-col md:flex-row items-center justify-between text-xs text-slate-500 dark:text-slate-400 gap-4">
-          <div>
-            © {new Date().getFullYear()} Prajwal Kalidas Mhetre. All rights reserved.
-          </div>
-          <div className="flex gap-6">
-            <a href="#about" className="hover:underline">About</a>
-            <a href="#skills" className="hover:underline">Skills</a>
-            <a href="#experience" className="hover:underline">Projects</a>
-            <a href="#playground" className="hover:underline">Playground</a>
-            <a href="#contact" className="hover:underline">Contact</a>
-          </div>
-          <div className="flex items-center gap-1.5">
-            Built with 
-            <span className="text-red-500">❤️</span> 
-            using Next.js & Tailwind CSS
+          <div className="mt-12 grid max-w-xl grid-cols-3 gap-5 border-t border-white/10 pt-7">
+            {[["100","Project ideas"],["2","Engineering domains"],["2027","Graduation target"]].map(([v,l])=><div key={l}><div className="text-2xl font-semibold tracking-tight text-white">{v}<span className="text-cyan-300">+</span></div><div className="mt-1 text-xs text-slate-500">{l}</div></div>)}
           </div>
         </div>
-      </footer>
-    </div>
-  )
+        <motion.div initial={{opacity:0,scale:.92,rotate:2}} animate={{opacity:1,scale:1,rotate:0}} transition={{duration:.8}} className="relative mx-auto w-full max-w-[410px]">
+          <div className="absolute -inset-5 rounded-[2rem] bg-gradient-to-br from-cyan-400/20 via-blue-500/10 to-violet-500/20 blur-2xl"/>
+          <div className="relative overflow-hidden rounded-[1.7rem] border border-white/15 bg-[#111827] p-3 shadow-2xl shadow-cyan-950/40">
+            <div className="mb-3 flex items-center justify-between px-2 pt-1 font-mono text-[10px] uppercase tracking-[.22em] text-slate-500"><span>Engineer profile / 01</span><span className="text-emerald-300">Available to connect</span></div>
+            <div className="relative aspect-[4/5] overflow-hidden rounded-[1.2rem] bg-[#d8c18e]">
+              <Image src="/profile.jpg" alt="Portrait of Prajwal Mhetre" fill priority sizes="(max-width: 768px) 90vw, 410px" className="object-cover object-center"/>
+            </div>
+            <div className="flex items-center justify-between px-2 pb-1 pt-4"><div><div className="font-semibold">Prajwal Mhetre</div><div className="mt-1 text-xs text-slate-400">Electronics · Software · AI</div></div><div className="rounded-full border border-cyan-300/30 p-3 text-cyan-200"><Cpu size={20}/></div></div>
+          </div>
+          <div className="absolute -bottom-5 -left-8 hidden rounded-xl border border-white/10 bg-[#111827]/95 px-4 py-3 shadow-xl backdrop-blur md:block"><div className="font-mono text-[10px] text-slate-500">CURRENT MODE</div><div className="mt-1 text-sm font-semibold text-cyan-200">Build · Measure · Improve</div></div>
+        </motion.div>
+      </section>
+
+      <section id="about" className="relative z-10 mx-auto max-w-7xl scroll-mt-24 px-5 py-20 lg:px-8">
+        <div className="grid gap-10 md:grid-cols-[.7fr_1.3fr]">
+          <div><p className="font-mono text-xs uppercase tracking-[.25em] text-cyan-300">01 / About</p><h2 className="mt-4 text-4xl font-semibold tracking-tight">Curious by design.<br/>Practical by default.</h2></div>
+          <div className="space-y-5 text-base leading-8 text-slate-400"><p>I’m pursuing a B.Tech in Electronics & Communication Engineering (2027), after completing a Diploma in Computer Science Engineering. I enjoy working across abstraction layers — from RTL and microcontrollers to APIs, data systems and cloud deployment.</p><p>My interests include digital design, computer architecture, firmware, real-time systems, wireless communication, applied AI and reliable software infrastructure. I value reproducible experiments, clear documentation, measurable testing and engineering trade-offs.</p>
+            <div className="grid gap-4 pt-3 sm:grid-cols-2"><div className="rounded-2xl border border-white/10 bg-white/[.025] p-5"><GraduationCap className="mb-3 text-cyan-300"/><div className="font-semibold text-white">B.Tech — E&TC</div><div className="mt-1 text-sm text-slate-500">Bharati Vidyapeeth College of Engineering, Pune · Expected 2027</div></div><div className="rounded-2xl border border-white/10 bg-white/[.025] p-5"><Code2 className="mb-3 text-violet-300"/><div className="font-semibold text-white">Diploma — Computer Science</div><div className="mt-1 text-sm text-slate-500">Basavakalyan Polytechnic · 2023</div></div></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="focus" className="relative z-10 mx-auto max-w-7xl scroll-mt-24 px-5 py-20 lg:px-8">
+        <p className="font-mono text-xs uppercase tracking-[.25em] text-cyan-300">02 / Engineering focus</p><h2 className="mt-4 text-4xl font-semibold tracking-tight">Two domains. One systems mindset.</h2>
+        <div className="mt-10 grid gap-5 md:grid-cols-2">
+          <div className="group rounded-3xl border border-cyan-300/20 bg-gradient-to-br from-cyan-300/[.09] to-transparent p-7 transition hover:-translate-y-1 hover:border-cyan-300/40"><CircuitBoard className="h-9 w-9 text-cyan-300"/><h3 className="mt-6 text-2xl font-semibold">Semiconductor & Embedded</h3><p className="mt-3 leading-7 text-slate-400">RTL design, RISC-V architecture, verification, FPGA, digital systems, STM32, ESP32, RTOS, firmware, IoT and wireless systems.</p><div className="mt-6 flex flex-wrap gap-2">{["Verilog","SystemVerilog","RISC-V","STM32","FreeRTOS","FPGA","SPICE"].map(s=><span key={s} className="rounded-full border border-cyan-300/20 px-3 py-1 text-xs text-cyan-100">{s}</span>)}</div></div>
+          <div className="group rounded-3xl border border-violet-300/20 bg-gradient-to-br from-violet-300/[.09] to-transparent p-7 transition hover:-translate-y-1 hover:border-violet-300/40"><Cloud className="h-9 w-9 text-violet-300"/><h3 className="mt-6 text-2xl font-semibold">Software & Intelligent Systems</h3><p className="mt-3 leading-7 text-slate-400">Backend APIs, full-stack products, AI/ML, LLM applications, databases, distributed systems, cloud, containers and CI/CD.</p><div className="mt-6 flex flex-wrap gap-2">{["Python","C++","Java","TypeScript","FastAPI","PostgreSQL","Docker","Kubernetes"].map(s=><span key={s} className="rounded-full border border-violet-300/20 px-3 py-1 text-xs text-violet-100">{s}</span>)}</div></div>
+        </div>
+        <div className="mt-7 rounded-2xl border border-white/10 bg-white/[.025] p-6"><div className="mb-4 text-sm font-semibold text-white">Technical toolkit</div><div className="flex flex-wrap gap-2">{skills.map(s=><span key={s} className="rounded-lg bg-white/[.06] px-3 py-2 text-xs text-slate-300">{s}</span>)}</div></div>
+      </section>
+
+      <section id="work" className="relative z-10 mx-auto max-w-7xl scroll-mt-24 px-5 py-20 lg:px-8">
+        <p className="font-mono text-xs uppercase tracking-[.25em] text-cyan-300">03 / Selected repositories</p><h2 className="mt-4 text-4xl font-semibold tracking-tight">Work you can inspect.</h2><p className="mt-3 max-w-2xl text-slate-400">A selection of repositories from my engineering work. Open the source to review implementation, documentation and current project status.</p>
+        <div className="mt-9 grid gap-4 md:grid-cols-2 lg:grid-cols-3">{featured.map((p,i)=><motion.a initial={{opacity:0,y:18}} whileInView={{opacity:1,y:0}} viewport={{once:true}} transition={{delay:i*.06}} key={p.name} href={p.href} target="_blank" rel="noreferrer" className="group rounded-2xl border border-white/10 bg-white/[.025] p-6 transition hover:-translate-y-1 hover:border-cyan-300/30 hover:bg-cyan-300/[.04]"><div className="flex items-center justify-between"><div className="rounded-xl border border-white/10 p-3 text-cyan-200"><Terminal size={20}/></div><ArrowUpRight className="text-slate-500 transition group-hover:-translate-y-1 group-hover:translate-x-1 group-hover:text-cyan-200"/></div><h3 className="mt-6 text-lg font-semibold">{p.name}</h3><p className="mt-2 min-h-12 text-sm leading-6 text-slate-400">{p.desc}</p><div className="mt-5 font-mono text-[10px] uppercase tracking-wider text-cyan-200">{p.tags}</div></motion.a>)}</div>
+      </section>
+
+      <section id="projects" className="relative z-10 mx-auto max-w-7xl scroll-mt-24 px-5 py-20 lg:px-8">
+        <p className="font-mono text-xs uppercase tracking-[.25em] text-cyan-300">04 / Project library</p><div className="mt-4 flex flex-wrap items-end justify-between gap-5"><div><h2 className="text-4xl font-semibold tracking-tight">100-project engineering map.</h2><p className="mt-3 max-w-2xl text-sm leading-7 text-slate-400">A curated build roadmap: 50 semiconductor and embedded concepts + 50 software concepts. These are project ideas, not claims that all 100 are already completed.</p></div><div className="rounded-full border border-white/10 px-4 py-2 font-mono text-xs text-slate-300">100 ENTRIES</div></div>
+        <div className="mt-8 flex flex-wrap gap-2">{([{id:"all",label:"All projects (100)"},{id:"semiconductor",label:"Semiconductor (50)"},{id:"software",label:"Software (50)"}] as const).map(t=><button key={t.id} onClick={()=>{setKind(t.id);setLevel("All")}} className={"rounded-full px-4 py-2 text-xs font-semibold transition "+(kind===t.id?"bg-cyan-300 text-slate-950":"border border-white/10 text-slate-300 hover:border-cyan-300/40")}>{t.label}</button>)}</div>
+        <div className="mt-4 flex flex-col gap-3 sm:flex-row"><label className="relative flex-1"><Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={16}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search projects, technologies or domains..." className="w-full rounded-xl border border-white/10 bg-white/[.04] py-3 pl-11 pr-4 text-sm outline-none placeholder:text-slate-600 focus:border-cyan-300/50"/></label><select value={level} onChange={e=>setLevel(e.target.value)} className="rounded-xl border border-white/10 bg-[#111827] px-4 py-3 text-sm text-slate-300 outline-none"><option>All</option><option>Advanced</option><option>Intermediate</option><option>Existing repo</option><option>Roadmap</option></select></div>
+        <div className="mt-5 flex items-center justify-between text-xs text-slate-500"><span>Showing {projects.length} of {kind==="all"?100:50} entries</span><span>Filter · Explore · Build</span></div>
+        <div className="mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-3">{projects.map((p,i)=><motion.article layout key={p.id+"-"+p.title} initial={{opacity:0}} animate={{opacity:1}} className="rounded-xl border border-white/[.08] bg-white/[.025] p-4 transition hover:border-cyan-300/25"><div className="flex items-start justify-between gap-3"><span className="font-mono text-[10px] text-slate-600">#{String(p.id).padStart(2,"0")}</span><span className="rounded-full bg-white/[.06] px-2.5 py-1 text-[10px] text-slate-400">{p.level}</span></div><h3 className="mt-3 text-sm font-semibold text-slate-100">{p.title}</h3><div className="mt-2 text-xs text-cyan-200">{p.area}</div><p className="mt-2 text-xs leading-5 text-slate-500">{p.stack}</p></motion.article>)}</div>
+        {projects.length===0&&<div className="rounded-xl border border-white/10 p-10 text-center text-slate-400">No matching projects. Try a different search.</div>}
+      </section>
+
+      <section id="music" className="relative z-10 mx-auto max-w-7xl scroll-mt-24 px-5 py-20 lg:px-8">
+        <p className="font-mono text-xs uppercase tracking-[.25em] text-cyan-300">05 / Off the clock</p><div className="mt-4 grid items-center gap-8 rounded-3xl border border-white/10 bg-gradient-to-br from-[#101b2b] to-[#11111d] p-7 md:grid-cols-[1fr_auto] md:p-10"><div><div className="flex items-center gap-3 text-violet-200"><Music2/><span className="font-mono text-xs uppercase tracking-[.2em]">Music & focus</span></div><h2 className="mt-5 text-3xl font-semibold">Good sound. Deep work.</h2><p className="mt-3 max-w-xl leading-7 text-slate-400">A small corner for focus sessions, instrumental playlists and the soundtracks behind long debugging nights. Choose what you want to play — audio will never autoplay.</p><a href="https://open.spotify.com/search/focus%20instrumental" target="_blank" rel="noreferrer" className="mt-6 inline-flex items-center gap-2 rounded-full border border-violet-300/30 px-5 py-3 text-sm font-semibold text-violet-200 transition hover:bg-violet-300/10">Explore focus music on Spotify <ExternalLink size={15}/></a></div><div className="relative flex h-36 w-36 items-center justify-center rounded-full border border-violet-300/20 bg-violet-300/[.05]"><div className="absolute inset-4 animate-spin rounded-full border border-dashed border-violet-300/30" style={{animationDuration:"22s"}}/><div className="flex items-end gap-1">{[20,38,27,52,34,44,18,31].map((h,i)=><span key={i} className="w-1.5 animate-pulse rounded-full bg-gradient-to-t from-cyan-300 to-violet-300" style={{height:h,animationDelay:(i*110)+"ms"}}/>)}</div></div></div>
+      </section>
+
+      <section id="contact" className="relative z-10 mx-auto max-w-7xl scroll-mt-24 px-5 pb-24 pt-16 lg:px-8">
+        <div className="rounded-3xl border border-cyan-300/20 bg-gradient-to-br from-cyan-300/[.09] via-blue-300/[.04] to-violet-300/[.08] p-8 md:p-12"><p className="font-mono text-xs uppercase tracking-[.25em] text-cyan-200">06 / Contact</p><h2 className="mt-4 max-w-3xl text-4xl font-semibold tracking-tight md:text-5xl">Have an engineering problem worth solving?</h2><p className="mt-4 max-w-2xl leading-7 text-slate-400">I’m open to meaningful conversations, collaborations, internships and engineering opportunities across embedded systems, semiconductor design and software.</p><div className="mt-8 flex flex-wrap gap-3"><a href="https://www.linkedin.com/in/prajwalmhetre/" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full bg-cyan-300 px-6 py-3 text-sm font-bold text-slate-950 transition hover:bg-cyan-200"><Linkedin size={16}/> LinkedIn</a><a href="https://github.com/PrajwalMhetre" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full border border-white/20 px-6 py-3 text-sm font-semibold hover:bg-white/5"><Github size={16}/> GitHub</a></div><div className="mt-8 flex items-center gap-2 text-xs text-slate-500"><MapPin size={14}/> Pune, Maharashtra, India</div></div>
+        <footer className="flex flex-col justify-between gap-3 border-t border-white/10 pt-7 text-xs text-slate-600 sm:flex-row"><span>© {new Date().getFullYear()} Prajwal Mhetre. Built with intent.</span><span>Silicon · Systems · Software</span></footer>
+      </section>
+    </main>
+  );
 }
